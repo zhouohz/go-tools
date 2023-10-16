@@ -2,7 +2,7 @@ package list
 
 import (
 	"fmt"
-	"tools/core/tp"
+	"tools/core/cae/tp"
 )
 
 // FindIndex 查询泛型在切片里的位置

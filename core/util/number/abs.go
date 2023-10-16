@@ -1,4 +1,4 @@
-package gnum
+package number
 
 //https://github.com/dablelv/go-huge-util/blob/master/abs.go
 

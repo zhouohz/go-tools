@@ -3,8 +3,8 @@ package list
 import (
 	"math/rand"
 	"sync"
+	"tools/core/cae/tp"
 	gfun "tools/core/function"
-	"tools/core/tp"
 )
 
 //https://github.com/samber/lo/slice.go

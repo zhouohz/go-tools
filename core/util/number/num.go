@@ -1,4 +1,4 @@
-package gnum
+package number
 
 import (
 	"fmt"
@@ -45,4 +45,13 @@ func NumFillZero(n, l int) string {
 // NumMulti 是否一个数字是否是另一个数字的整数倍
 func NumMulti(n1, n2 int) bool {
 	return (n1 % n2) == 0
+}
+
+// NumInRange 是否一个数字在两个数字之间
+func NumInRange(in int, rangeStart, rangeEnd int, equal bool) bool {
+	if equal {
+		return in >= rangeStart && in <= rangeEnd
+	}
+
+	return in > rangeStart && in < rangeEnd
 }

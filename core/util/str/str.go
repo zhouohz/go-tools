@@ -104,6 +104,16 @@ func SplitIgnoreBlank(s, sep string) []string {
 	return result
 }
 
+// Split 切分字符串
+func Split(s, sep string) []string {
+	if s == "" || len(s) == 0 {
+		return []string{}
+	}
+	split := strings.Split(s, sep)
+
+	return split
+}
+
 // SubStrByLen 截取字符串的长度
 // @param str 原字符串
 // @param start 起始下标,负数从尾部开始,-1为最后一个

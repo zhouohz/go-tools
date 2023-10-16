@@ -3,7 +3,7 @@ package array
 import (
 	"fmt"
 	"math/rand"
-	"tools/core/tp"
+	"tools/core/cae/tp"
 )
 
 // INDEX_NOT_FOUND 表示未找到元素的返回值
