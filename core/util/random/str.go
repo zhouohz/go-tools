@@ -1,4 +1,4 @@
-package grandom
+package random
 
 import (
 	crand "crypto/rand"
@@ -39,7 +39,7 @@ func RandomString(n int, letters ...string) (string, error) {
 }
 
 // RandomStr 随机字符串
-func RandomStr(l uint64) string {
+func RandomStr(l int) string {
 	b := make([]byte, l)
 	for i := range b {
 		b[i] = lettersLetter[RandInt(enAlphabetLen)]
@@ -48,7 +48,7 @@ func RandomStr(l uint64) string {
 }
 
 // RandomLowerStr 随机字符串小写
-func RandomLowerStr(l uint32) string {
+func RandomLowerStr(l int) string {
 	b := make([]byte, l)
 	for i := range b {
 		b[i] = lowerEnLetter[RandInt(lowerEnLetterLen)]
@@ -57,7 +57,7 @@ func RandomLowerStr(l uint32) string {
 }
 
 // RandomUpperStr 随机字符串大写
-func RandomUpperStr(l uint32) string {
+func RandomUpperStr(l int) string {
 	return strings.ToUpper(RandomLowerStr(l))
 }
 

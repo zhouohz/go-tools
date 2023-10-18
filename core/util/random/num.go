@@ -1,4 +1,4 @@
-package grandom
+package random
 
 import (
 	"math/rand"
