@@ -43,7 +43,7 @@ const (
 	//MimeTypeAudio output base64 mine-type.
 	MimeTypeAudio = "audio/wav"
 	//MimeTypeImage output base64 mine-type.
-	MimeTypeImage = "image/png"
+	MimeTypeImage = "bg/png"
 	//Emoji is a source string for randTxt
 	Emoji = "😀😃💯😄🤖😻😅🤣😂🧑🙃😉😊😇😍👴🤩😘😗☺👽♀😙♂😋😛🎨😜🤪😝🤑🤗🤭🤫🤔🤐🤨😐🙉😶😏💗🙄😬🤥😌😪🤤😷🤢🤮🤯😵🤠😎🧐😨😰😱😭😖😡🤬👿☠💀💥💢"
 )

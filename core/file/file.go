@@ -343,10 +343,10 @@ func PathJoin(pathArr ...string) string {
 
 // 返回值说明：
 //	7z、exe、doc 类型会返回 application/octet-stream  未知的文件类型
-//	jpg	=>	image/jpeg
-//	png	=>	image/png
-//	ico	=>	image/x-icon
-//	bmp	=>	image/bmp
+//	jpg	=>	bg/jpeg
+//	png	=>	bg/png
+//	ico	=>	bg/x-icon
+//	bmp	=>	bg/bmp
 //  xlsx、docx 、zip	=>	application/zip
 //  tar.gz	=>	application/x-gzip
 //  txt、json、log等文本文件	=>	text/plain; charset=utf-8   备注：就算txt是gbk、ansi编码，也会识别为utf-8

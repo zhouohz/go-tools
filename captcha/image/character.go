@@ -3,6 +3,7 @@ package image
 import (
 	"github.com/golang/freetype/truetype"
 	"image/color"
+	"strings"
 	"tools/captcha/image/fonts"
 	"tools/core/util/random"
 )
@@ -27,7 +28,7 @@ type Character struct {
 	//Source is a unicode which is the rand string from.
 	Source string
 
-	//BgColor captcha image background color (optional)
+	//BgColor captcha bg background color (optional)
 	BgColor *color.RGBA
 
 	////Fonts loads by name see fonts.go's comment
@@ -44,7 +45,7 @@ func NewCharacter(height int, width int, noiseCount int, showLineOptions int, le
 func (d *Character) convertFonts() *Character {
 	var tfs []*truetype.Font
 	for _, fff := range d.Fonts {
-		tf := fonts.LoadFontByName("captcha/image/fonts/" + fff)
+		tf := fonts.LoadFontByName("captcha/bg/fonts/" + fff)
 		tfs = append(tfs, tf)
 	}
 	if len(tfs) == 0 {
@@ -68,6 +69,8 @@ func (d *Character) DrawCaptcha(content string) (item Item, err error) {
 	} else {
 		bgc = random.RandLightColor()
 	}
+
+	d.convertFonts()
 	itemChar := NewItemChar(d.Width, d.Height, bgc)
 
 	//draw hollow line
@@ -85,17 +88,15 @@ func (d *Character) DrawCaptcha(content string) (item Item, err error) {
 		itemChar.drawSineLine()
 	}
 
-	////draw noise
-	//if d.NoiseCount > 0 {
-	//	source := TxtNumbers + TxtAlphabet + ",.[]<>"
-	//	noise := RandText(d.NoiseCount, strings.Repeat(source, d.NoiseCount))
-	//	err = itemChar.drawNoise(noise, d.fontsArray)
-	//	if err != nil {
-	//		return
-	//	}
-	//}
-	//
-	d.convertFonts()
+	//draw noise
+	if d.NoiseCount > 0 {
+		source := TxtNumbers + TxtAlphabet + ",.[]<>"
+		noise, _ := random.RandomString(d.NoiseCount, strings.Repeat(source, d.NoiseCount))
+		err = itemChar.drawNoise(noise, d.fontsArray)
+		if err != nil {
+			return
+		}
+	}
 
 	//draw content
 	err = itemChar.drawText(content, d.fontsArray)

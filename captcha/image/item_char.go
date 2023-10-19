@@ -203,7 +203,7 @@ func (item *ItemChar) drawNoise(noiseText string, fonts []*truetype.Font) error 
 	return nil
 }
 
-//drawText draw captcha string to image.把文字写入图像验证码
+//drawText draw captcha string to bg.把文字写入图像验证码
 
 func (item *ItemChar) drawText(text string, fonts []*truetype.Font) error {
 	c := freetype.NewContext()
@@ -235,7 +235,7 @@ func (item *ItemChar) drawText(text string, fonts []*truetype.Font) error {
 	return nil
 }
 
-// BinaryEncoding encodes an image to PNG and returns a byte slice.
+// BinaryEncoding encodes an bg to PNG and returns a byte slice.
 func (item *ItemChar) BinaryEncoding() []byte {
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, item.nrgba); err != nil {
@@ -251,7 +251,7 @@ func (item *ItemChar) WriteTo(w io.Writer) (int64, error) {
 	return int64(n), err
 }
 
-// EncodeB64string encodes an image to base64 string
+// EncodeB64string encodes an bg to base64 string
 func (item *ItemChar) EncodeB64string() string {
 	return fmt.Sprintf("data:%s;base64,%s", MimeTypeImage, base64.StdEncoding.EncodeToString(item.BinaryEncoding()))
 }

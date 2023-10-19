@@ -71,11 +71,11 @@ func TestName(t *testing.T) {
 	// 保存验证码图像
 	err := dc.SavePNG("captcha.png")
 	if err != nil {
-		fmt.Println("Failed to save image:", err)
+		fmt.Println("Failed to save bg:", err)
 		return
 	}
 
-	fmt.Println("Captcha image saved as captcha.png")
+	fmt.Println("Captcha bg saved as captcha.png")
 }
 
 func generateRandomCode(length int) string {

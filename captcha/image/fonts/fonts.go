@@ -23,7 +23,7 @@ var fontsSimple = LoadFontsByNames([]string{
 // var fontemoji = loadFontByName("fonts/seguiemj.ttf")
 var FontsAll = append(fontsSimple)
 
-//var FontChinese = LoadFontByName("captcha/image/fonts/res/wqy-microhei.ttc")
+//var FontChinese = LoadFontByName("captcha/bg/fonts/res/wqy-microhei.ttc")
 
 // loadFontsByNames import fonts from dir.
 // make the simple-font(RitaSmith.ttf) the first font of trueTypeFonts.
