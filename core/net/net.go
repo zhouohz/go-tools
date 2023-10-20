@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"tools/core/util/str"
 )
 
 var localhostName string

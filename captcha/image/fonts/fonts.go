@@ -4,7 +4,6 @@ import (
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"math/rand"
-	"tools/core/file"
 )
 
 var fontsSimple = LoadFontsByNames([]string{

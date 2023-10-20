@@ -2,7 +2,6 @@ package slide
 
 import (
 	"math"
-	"tools/core/util/random"
 )
 
 type rg struct {

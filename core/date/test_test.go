@@ -3,7 +3,6 @@ package date
 import (
 	"fmt"
 	"testing"
-	"tools/core/util/desensitized"
 )
 
 func TestDate(t *testing.T) {

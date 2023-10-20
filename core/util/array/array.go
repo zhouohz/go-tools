@@ -2,8 +2,8 @@ package array
 
 import (
 	"fmt"
+	"github.com/zhouohz/go-tools/core/cae/tp"
 	"math/rand"
-	"tools/core/cae/tp"
 )
 
 // INDEX_NOT_FOUND 表示未找到元素的返回值

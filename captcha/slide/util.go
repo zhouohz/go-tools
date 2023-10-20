@@ -4,7 +4,6 @@ import (
 	"image/png"
 	"math/rand"
 	"os"
-	"tools/core/util/random"
 )
 
 var bgSimple = LoadBgByNames([]string{

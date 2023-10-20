@@ -2,7 +2,7 @@ package list
 
 import (
 	"fmt"
-	"tools/core/cae/tp"
+	"github.com/zhouohz/go-tools/core/cae/tp"
 )
 
 // FindIndex 查询泛型在切片里的位置

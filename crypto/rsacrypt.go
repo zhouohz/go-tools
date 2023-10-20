@@ -1,4 +1,4 @@
-package gcrypto
+package crypto
 
 import (
 	"bytes"

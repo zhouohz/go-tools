@@ -2,12 +2,12 @@ package net
 
 import (
 	"fmt"
+	"github.com/zhouohz/go-tools/core/conv"
+	"github.com/zhouohz/go-tools/core/util/number"
+	"github.com/zhouohz/go-tools/core/util/str"
 	"math/rand"
 	"net"
 	"time"
-	"tools/core/conv"
-	"tools/core/util/number"
-	"tools/core/util/str"
 )
 
 // Default minimum and maximum port ranges

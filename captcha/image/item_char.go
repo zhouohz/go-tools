@@ -16,8 +16,6 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	fonts2 "tools/captcha/image/fonts"
-	"tools/core/util/random"
 )
 
 // ItemChar captcha item of unicode characters

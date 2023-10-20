@@ -961,7 +961,7 @@ func ToStringE(i interface{}) (string, error) {
 	}
 }
 
-// ToStringMapStringE casts an interface to a map[string]string type.
+// ToStringMapStringE casts an interface to a zmap[string]string type.
 func ToStringMapStringE(i interface{}) (map[string]string, error) {
 	var m = map[string]string{}
 
@@ -987,11 +987,11 @@ func ToStringMapStringE(i interface{}) (map[string]string, error) {
 		err := jsonStringToObject(v, &m)
 		return m, err
 	default:
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]string", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]string", i, i)
 	}
 }
 
-// ToStringMapStringSliceE casts an interface to a map[string][]string type.
+// ToStringMapStringSliceE casts an interface to a zmap[string][]string type.
 func ToStringMapStringSliceE(i interface{}) (map[string][]string, error) {
 	var m = map[string][]string{}
 
@@ -1038,11 +1038,11 @@ func ToStringMapStringSliceE(i interface{}) (map[string][]string, error) {
 		for k, val := range v {
 			key, err := ToStringE(k)
 			if err != nil {
-				return m, fmt.Errorf("unable to cast %#v of type %T to map[string][]string", i, i)
+				return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string][]string", i, i)
 			}
 			value, err := ToStrSliceE(val)
 			if err != nil {
-				return m, fmt.Errorf("unable to cast %#v of type %T to map[string][]string", i, i)
+				return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string][]string", i, i)
 			}
 			m[key] = value
 		}
@@ -1050,12 +1050,12 @@ func ToStringMapStringSliceE(i interface{}) (map[string][]string, error) {
 		err := jsonStringToObject(v, &m)
 		return m, err
 	default:
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string][]string", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string][]string", i, i)
 	}
 	return m, nil
 }
 
-// ToStringMapBoolE casts an interface to a map[string]bool type.
+// ToStringMapBoolE casts an interface to a zmap[string]bool type.
 func ToStringMapBoolE(i interface{}) (map[string]bool, error) {
 	var m = map[string]bool{}
 
@@ -1076,11 +1076,11 @@ func ToStringMapBoolE(i interface{}) (map[string]bool, error) {
 		err := jsonStringToObject(v, &m)
 		return m, err
 	default:
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]bool", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]bool", i, i)
 	}
 }
 
-// ToStringMapE casts an interface to a map[string]interface{} type.
+// ToStringMapE casts an interface to a zmap[string]interface{} type.
 func ToStringMapE(i interface{}) (map[string]interface{}, error) {
 	var m = map[string]interface{}{}
 
@@ -1096,15 +1096,15 @@ func ToStringMapE(i interface{}) (map[string]interface{}, error) {
 		err := jsonStringToObject(v, &m)
 		return m, err
 	default:
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]interface{}", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]interface{}", i, i)
 	}
 }
 
-// ToStringMapIntE casts an interface to a map[string]int{} type.
+// ToStringMapIntE casts an interface to a zmap[string]int{} type.
 func ToStringMapIntE(i interface{}) (map[string]int, error) {
 	var m = map[string]int{}
 	if i == nil {
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]int", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]int", i, i)
 	}
 
 	switch v := i.(type) {
@@ -1126,7 +1126,7 @@ func ToStringMapIntE(i interface{}) (map[string]int, error) {
 	}
 
 	if reflect.TypeOf(i).Kind() != reflect.Map {
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]int", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]int", i, i)
 	}
 
 	mVal := reflect.ValueOf(m)
@@ -1134,18 +1134,18 @@ func ToStringMapIntE(i interface{}) (map[string]int, error) {
 	for _, keyVal := range v.MapKeys() {
 		val, err := ToIntE(v.MapIndex(keyVal).Interface())
 		if err != nil {
-			return m, fmt.Errorf("unable to cast %#v of type %T to map[string]int", i, i)
+			return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]int", i, i)
 		}
 		mVal.SetMapIndex(keyVal, reflect.ValueOf(val))
 	}
 	return m, nil
 }
 
-// ToStringMapInt64E casts an interface to a map[string]int64{} type.
+// ToStringMapInt64E casts an interface to a zmap[string]int64{} type.
 func ToStringMapInt64E(i interface{}) (map[string]int64, error) {
 	var m = map[string]int64{}
 	if i == nil {
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]int64", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]int64", i, i)
 	}
 
 	switch v := i.(type) {
@@ -1167,14 +1167,14 @@ func ToStringMapInt64E(i interface{}) (map[string]int64, error) {
 	}
 
 	if reflect.TypeOf(i).Kind() != reflect.Map {
-		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]int64", i, i)
+		return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]int64", i, i)
 	}
 	mVal := reflect.ValueOf(m)
 	v := reflect.ValueOf(i)
 	for _, keyVal := range v.MapKeys() {
 		val, err := ToInt64E(v.MapIndex(keyVal).Interface())
 		if err != nil {
-			return m, fmt.Errorf("unable to cast %#v of type %T to map[string]int64", i, i)
+			return m, fmt.Errorf("unable to cast %#v of type %T to zmap[string]int64", i, i)
 		}
 		mVal.SetMapIndex(keyVal, reflect.ValueOf(val))
 	}

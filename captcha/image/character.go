@@ -4,8 +4,6 @@ import (
 	"github.com/golang/freetype/truetype"
 	"image/color"
 	"strings"
-	"tools/captcha/image/fonts"
-	"tools/core/util/random"
 )
 
 // Character captcha config for captcha-engine-characters.

@@ -1,10 +1,10 @@
 package list
 
 import (
+	"github.com/zhouohz/go-tools/core/cae/tp"
+	gfun "github.com/zhouohz/go-tools/core/function"
 	"math/rand"
 	"sync"
-	"tools/core/cae/tp"
-	gfun "tools/core/function"
 )
 
 //https://github.com/samber/lo/slice.go

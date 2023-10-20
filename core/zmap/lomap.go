@@ -1,6 +1,6 @@
-package gmap
+package zmap
 
-import "tools/core/collection/list"
+import "github.com/zhouohz/go-tools/core/collection/list"
 
 type Entry[K comparable, V any] struct {
 	Key   K

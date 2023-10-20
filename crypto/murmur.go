@@ -1,4 +1,4 @@
-package gcrypto
+package crypto
 
 // https://github.com/PeterScott/murmur3
 // https://github.com/spaolacci/murmur3
