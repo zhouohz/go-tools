@@ -1,4 +1,4 @@
-module github.com/zhouohz/go-toolsg
+module github.com/zhouohz/go-tools
 
 go 1.20
 
