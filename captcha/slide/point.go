@@ -1,6 +1,7 @@
 package slide
 
 import (
+	"github.com/zhouohz/go-tools/core/util/random"
 	"math"
 )
 

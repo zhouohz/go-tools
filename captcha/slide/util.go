@@ -1,6 +1,7 @@
 package slide
 
 import (
+	"github.com/zhouohz/go-tools/core/util/random"
 	"image/png"
 	"math/rand"
 	"os"
@@ -12,11 +13,6 @@ var bgSimple = LoadBgByNames([]string{
 
 var blockSimple = LoadBgByNames([]string{
 	"res/block/1.png",
-	"res/block/2.png",
-	"res/block/3.png",
-	"res/block/4.png",
-	"res/block/5.png",
-	"res/block/6.png",
 })
 
 func LoadBgByNames(assetNames []string) []*Image {
