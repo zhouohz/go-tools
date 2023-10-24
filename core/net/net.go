@@ -2,6 +2,7 @@ package net
 
 import (
 	"fmt"
+	"github.com/zhouohz/go-tools/core/util/str"
 	"net"
 	"net/http"
 	"net/url"

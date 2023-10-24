@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"image/jpeg"
 	"image/png"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -133,4 +134,35 @@ func ToBase64(img image.Image) (string, error) {
 	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	return encoded, nil
+}
+
+func ModifyImageRGBA(img image.Image, rgba color.RGBA) image.Image {
+	bounds := img.Bounds()
+	width, height := bounds.Dx(), bounds.Dy()
+
+	var newImg *image.RGBA
+
+	if imgRGBA, ok := img.(*image.RGBA); ok {
+		newImg = image.NewRGBA(image.Rect(0, 0, width, height))
+		copy(newImg.Pix, imgRGBA.Pix)
+	} else if imgNRGBA, ok := img.(*image.NRGBA); ok {
+		newImg = image.NewRGBA(image.Rect(0, 0, width, height))
+		copy(newImg.Pix, imgNRGBA.Pix)
+	} else {
+		log.Fatal("Unsupported image format")
+	}
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			// 获取像素颜色
+			r, g, b, a := newImg.At(x, y).RGBA()
+
+			// 如果是黑色，将其更改为新颜色
+			if r == 0 && g == 0 && b == 0 && a > 0 {
+				newImg.Set(x, y, rgba)
+			}
+		}
+	}
+
+	return newImg
 }

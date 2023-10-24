@@ -6,6 +6,7 @@ import (
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/draw"
 	"image"
+	"image/color"
 	"image/png"
 	"log"
 	"os"
@@ -35,8 +36,13 @@ func TestName(t *testing.T) {
 
 	cutImage := image2.CutImage(backImage, fixedImage, randomX, randomY)
 
-	Cut(backImage, cutImage, 100, 100)
-	//backImage = OverlayImage(backImage, fixedImage, randomX, randomY)
+	//Cut(backImage, cutImage, 100, 100)
+	backImage = image2.OverlayImage(backImage, image2.ModifyImageRGBA(fixedImage, color.RGBA{
+		R: 40,
+		G: 40,
+		B: 40,
+		A: 160,
+	}), randomX, randomY)
 	//cutImage = OverlayImage(cutImage, actImage, 0, 0)
 	//
 	//matrixTemplate := CreateTransparentImage(actImage.Bounds().Dx(), backImage.Bounds().Dy())
