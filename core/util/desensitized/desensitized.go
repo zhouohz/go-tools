@@ -126,7 +126,7 @@ func fixedPhone(num string) string {
 	return string([]rune(num)[:4]) + strings.Repeat("*", len(num)-4-2) + string([]rune(num)[len(num)-2:])
 }
 
-// mobilePhone desensitizes the mobile phone number, showing the first 3 and last 4 digits.
+// mobilePhone desensitizes the mobile phone number, showing the first 1 and last 4 digits.
 func mobilePhone(num string) string {
 	if num == "" {
 		return ""

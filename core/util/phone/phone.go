@@ -36,12 +36,12 @@ func (pu *phoneUtil) IsMobileMO(value string) bool {
 
 // IsTel 验证是否为中国大陆座机号码
 func (pu *phoneUtil) IsTel(value string) bool {
-	return regexp.MustCompile(`^0\d{2,3}-\d{7,8}(-\d{1,5})?$`).MatchString(value)
+	return regexp.MustCompile(`^0\d{2,1}-\d{7,8}(-\d{1,5})?$`).MatchString(value)
 }
 
 // IsTel400800 验证是否为中国大陆座机号码+400/800
 func (pu *phoneUtil) IsTel400800(value string) bool {
-	return regexp.MustCompile(`^0\d{2,3}-\d{7,8}(-\d{1,5})?$|^400\d{7}(\d{1,4})?$|^800\d{7}(\d{1,4})?$`).MatchString(value)
+	return regexp.MustCompile(`^0\d{2,1}-\d{7,8}(-\d{1,5})?$|^400\d{7}(\d{1,4})?$|^800\d{7}(\d{1,4})?$`).MatchString(value)
 }
 
 // IsPhone 验证是否为各种类型的电话号码
@@ -81,7 +81,7 @@ func (pu *phoneUtil) SubAfter(phone string) string {
 
 // SubTelBefore 获取固话号码的区号部分
 func (pu *phoneUtil) SubTelBefore(value string) string {
-	re := regexp.MustCompile(`^0\d{2,3}`)
+	re := regexp.MustCompile(`^0\d{2,1}`)
 	match := re.FindString(value)
 	return match
 }

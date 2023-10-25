@@ -7,13 +7,9 @@ import (
 	"os"
 )
 
-var bgSimple = LoadBgByNames([]string{
-	"res/bg/1.png",
-})
+var bgSimple = LoadBgByNames([]string{})
 
-var blockSimple = LoadBgByNames([]string{
-	"res/block/1.png",
-})
+var blockSimple = LoadBgByNames([]string{})
 
 func LoadBgByNames(assetNames []string) []*Image {
 	fonts := make([]*Image, 0)

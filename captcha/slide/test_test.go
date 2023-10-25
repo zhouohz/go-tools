@@ -1,12 +1,11 @@
 package slide
 
 import (
+	"fmt"
 	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/random"
-	"golang.org/x/image/colornames"
 	"golang.org/x/image/draw"
 	"image"
-	"image/color"
 	"image/png"
 	"log"
 	"os"
@@ -14,9 +13,13 @@ import (
 )
 
 func TestName(t *testing.T) {
-	background := "./res/bg/1.png"
-	//active := "active.png"
-	fixed := "./res/block/1.png"
+
+	bint := random.RandomIntRange(1, 5)
+	blockInt := random.RandomIntRange(1, 3)
+
+	background := fmt.Sprintf("./res/bg/%d.jpg", bint)
+	active := fmt.Sprintf("./res/block/%d/active.png", blockInt)
+	fixed := fmt.Sprintf("./res/block/%d/fixed.png", blockInt)
 	backImage, err := image2.ParseImage(background)
 	if err != nil {
 		log.Panic(err)
@@ -25,78 +28,28 @@ func TestName(t *testing.T) {
 	if err != nil {
 		log.Panic(err)
 	}
-	//actImage, err := ParseImage(active)
-	//if err != nil {
-	//	log.Panic(err)
-	//}
+	actImage, err := image2.ParseImage(active)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	// 获取随机的 x 和 y 轴
 	randomX := random.RandomIntRange(fixedImage.Bounds().Dx()+5, backImage.Bounds().Dx()-fixedImage.Bounds().Dx()-10)
 	randomY := random.RandInt(backImage.Bounds().Dy() - fixedImage.Bounds().Dy())
-
+	backOverlayImage := image2.OverlayImage(backImage, fixedImage, randomX, randomY)
 	cutImage := image2.CutImage(backImage, fixedImage, randomX, randomY)
+	overlayImage := image2.OverlayImage(actImage, cutImage, 0, 0)
 
-	//Cut(backImage, cutImage, 100, 100)
-	backImage = image2.OverlayImage(backImage, image2.ModifyImageRGBA(fixedImage, color.RGBA{
-		R: 40,
-		G: 40,
-		B: 40,
-		A: 160,
-	}), randomX, randomY)
-	//cutImage = OverlayImage(cutImage, actImage, 0, 0)
+	matrixTemplate := image2.CreateTransparentImage(actImage.Bounds().Dx(), backImage.Bounds().Dy())
 	//
-	//matrixTemplate := CreateTransparentImage(actImage.Bounds().Dx(), backImage.Bounds().Dy())
-	////
-	//i := OverlayImage(matrixTemplate, cutImage, 0, randomY)
+	i := image2.OverlayImage(matrixTemplate, overlayImage, 0, randomY)
 
-	//if err := SaveAs(i, "cut.jpg"); err != nil {
-	//	log.Panic(err)
-	//}
-	if err := SaveAs(cutImage, "bg.jpg"); err != nil {
+	if err := SaveAs(i, "bg.png"); err != nil {
 		log.Panic(err)
 	}
 
-	if err := SaveAs(backImage, "bg1.jpg"); err != nil {
+	if err := SaveAs(backOverlayImage, "bg1.png"); err != nil {
 		log.Panic(err)
-	}
-}
-
-func Cut(backgroundImage, templateImage image.Image, x1, y1 int) {
-	xLength := templateImage.Bounds().Dx()
-	yLength := templateImage.Bounds().Dy()
-
-	for x := 0; x < xLength; x++ {
-		for y := 0; y < yLength; y++ {
-			// 如果模板图像当前像素点不是透明色 copy源文件信息到目标图片中
-			isOpacity := IsOpacity(templateImage, x, y)
-			// 当前模板像素在背景图中的位置
-			backgroundX := x + x1
-			backgroundY := y + y1
-
-			//// 当不为透明时
-			//if !isOpacity {
-			//	// 获取原图像素
-			//	backgroundRgba := ImageToRGBA(backgroundImage).RGBAAt(backgroundX, backgroundY)
-			//	// 将原图的像素扣到模板图上
-			//	templateImage.SetPixel(backgroundRgba, x, y)
-			//	// 背景图区域模糊
-			//	backgroundImage.VagueImage(backgroundX, backgroundY)
-			//}
-
-			//防止数组越界判断
-			if x == (xLength-1) || y == (yLength-1) {
-				continue
-			}
-
-			rightOpacity := IsOpacity(templateImage, x+1, y)
-			downOpacity := IsOpacity(templateImage, x, y+1)
-
-			//描边处理，,取带像素和无像素的界点，判断该点是不是临界轮廓点,如果是设置该坐标像素是白色
-			if (isOpacity && !rightOpacity) || (!isOpacity && rightOpacity) || (isOpacity && !downOpacity) || (!isOpacity && downOpacity) {
-				ImageToRGBA(backgroundImage).SetRGBA(x, y, colornames.White)
-				ImageToRGBA(backgroundImage).SetRGBA(backgroundX, backgroundY, colornames.White)
-			}
-		}
 	}
 }
 
@@ -133,3 +86,72 @@ func ImageToRGBA(img image.Image) *image.RGBA {
 	draw.Draw(dst, dst.Bounds(), img, b.Min, draw.Src)
 	return dst
 }
+
+//func TestGet(t *testing.T) {
+//	// 打开图像文件
+//	imageFile, err := os.Open("./res/block/1/active.png")
+//	if err != nil {
+//		fmt.Println("Error opening image:", err)
+//		return
+//	}
+//	defer imageFile.Close()
+//
+//	// 解码图像
+//	img, _, err := image.Decode(imageFile)
+//	if err != nil {
+//		fmt.Println("Error decoding image:", err)
+//		return
+//	}
+//
+//	// 创建一个新的RGBA图像
+//	bounds := img.Bounds()
+//	newImage := image.NewRGBA(bounds)
+//
+//	// 遍历图像像素
+//	for x := bounds.Min.X; x < bounds.Max.X; x++ {
+//		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+//			// 获取当前像素的颜色
+//			curColor := img.At(x, y)
+//
+//			// 检查是否是不透明的像素
+//			_, _, _, alpha := curColor.RGBA()
+//
+//			if alpha > 0 {
+//				// 检查上下左右四个方向的像素
+//				left := img.At(x-1, y)
+//				right := img.At(x+1, y)
+//				up := img.At(x, y-1)
+//				down := img.At(x, y+1)
+//
+//				// 如果至少一个相邻像素是透明的，将当前像素的颜色设置为白色
+//				if isTransparent(left) || isTransparent(right) || isTransparent(up) || isTransparent(down) {
+//					newImage.Set(x, y, color.White)
+//				} else {
+//					newImage.Set(x, y, curColor)
+//				}
+//			}
+//		}
+//	}
+//
+//	// 保存处理后的图像
+//	outputFile, err := os.Create("output.png")
+//	if err != nil {
+//		fmt.Println("Error creating output file:", err)
+//		return
+//	}
+//	defer outputFile.Close()
+//
+//	err = png.Encode(outputFile, newImage)
+//	if err != nil {
+//		fmt.Println("Error encoding image:", err)
+//		return
+//	}
+//
+//	fmt.Println("Image processing complete.")
+//}
+//
+//// 检查颜色是否是完全透明
+//func isTransparent(c color.Color) bool {
+//	_, _, _, alpha := c.RGBA()
+//	return alpha == 0
+//}

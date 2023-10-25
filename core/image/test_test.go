@@ -12,7 +12,7 @@ import (
 func TestOverlayImage(t *testing.T) {
 	background := "1.jpg"
 	//active := "active.png"
-	fixed := "fixed.png"
+	fixed := "1.png"
 	backImage, err := ParseImage(background)
 	if err != nil {
 		log.Panic(err)
