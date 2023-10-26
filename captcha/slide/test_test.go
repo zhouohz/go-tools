@@ -14,12 +14,12 @@ import (
 
 func TestName(t *testing.T) {
 
-	bint := random.RandomIntRange(1, 5)
-	blockInt := random.RandomIntRange(1, 3)
+	//bint := random.RandomIntRange(1, 3)
+	//blockInt := random.RandomIntRange(1, 3)
 
-	background := fmt.Sprintf("./res/bg/%d.jpg", bint)
-	active := fmt.Sprintf("./res/block/%d/active.png", blockInt)
-	fixed := fmt.Sprintf("./res/block/%d/fixed.png", blockInt)
+	background := fmt.Sprintf("./res/bg/%d.jpg", 5)
+	active := fmt.Sprintf("./res/block/%d/active.png", 1)
+	fixed := fmt.Sprintf("./res/block/%d/fixed.png", 1)
 	backImage, err := image2.ParseImage(background)
 	if err != nil {
 		log.Panic(err)
@@ -86,72 +86,3 @@ func ImageToRGBA(img image.Image) *image.RGBA {
 	draw.Draw(dst, dst.Bounds(), img, b.Min, draw.Src)
 	return dst
 }
-
-//func TestGet(t *testing.T) {
-//	// 打开图像文件
-//	imageFile, err := os.Open("./res/block/1/active.png")
-//	if err != nil {
-//		fmt.Println("Error opening image:", err)
-//		return
-//	}
-//	defer imageFile.Close()
-//
-//	// 解码图像
-//	img, _, err := image.Decode(imageFile)
-//	if err != nil {
-//		fmt.Println("Error decoding image:", err)
-//		return
-//	}
-//
-//	// 创建一个新的RGBA图像
-//	bounds := img.Bounds()
-//	newImage := image.NewRGBA(bounds)
-//
-//	// 遍历图像像素
-//	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-//		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-//			// 获取当前像素的颜色
-//			curColor := img.At(x, y)
-//
-//			// 检查是否是不透明的像素
-//			_, _, _, alpha := curColor.RGBA()
-//
-//			if alpha > 0 {
-//				// 检查上下左右四个方向的像素
-//				left := img.At(x-1, y)
-//				right := img.At(x+1, y)
-//				up := img.At(x, y-1)
-//				down := img.At(x, y+1)
-//
-//				// 如果至少一个相邻像素是透明的，将当前像素的颜色设置为白色
-//				if isTransparent(left) || isTransparent(right) || isTransparent(up) || isTransparent(down) {
-//					newImage.Set(x, y, color.White)
-//				} else {
-//					newImage.Set(x, y, curColor)
-//				}
-//			}
-//		}
-//	}
-//
-//	// 保存处理后的图像
-//	outputFile, err := os.Create("output.png")
-//	if err != nil {
-//		fmt.Println("Error creating output file:", err)
-//		return
-//	}
-//	defer outputFile.Close()
-//
-//	err = png.Encode(outputFile, newImage)
-//	if err != nil {
-//		fmt.Println("Error encoding image:", err)
-//		return
-//	}
-//
-//	fmt.Println("Image processing complete.")
-//}
-//
-//// 检查颜色是否是完全透明
-//func isTransparent(c color.Color) bool {
-//	_, _, _, alpha := c.RGBA()
-//	return alpha == 0
-//}

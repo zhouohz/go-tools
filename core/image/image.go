@@ -74,6 +74,75 @@ func CutImage(oriImage image.Image, templateImage image.Image, xPos, yPos int) i
 	return targetImage
 }
 
+// CutImageWithBorderBlur 通过模板图片抠图（不透明部分），并对边界区域进行模糊处理
+func CutImageWithBorderBlur(oriImage image.Image, templateImage image.Image, xPos, yPos, blurSize int) image.Image {
+	templateBounds := templateImage.Bounds()
+	targetImage := image.NewRGBA(templateBounds)
+
+	// 处理内部像素，与之前相同
+	for y := 0; y < templateBounds.Dy(); y++ {
+		for x := 0; x < templateBounds.Dx(); x++ {
+			alpha := templateImage.At(x, y).(color.NRGBA).A
+			if alpha > 100 {
+				bgRgb := oriImage.At(xPos+x, yPos+y)
+				targetImage.Set(x, y, bgRgb)
+			}
+		}
+	}
+
+	// 处理边界像素，对边界区域进行模糊处理
+	for y := 0; y < templateBounds.Dy(); y++ {
+		for x := 0; x < templateBounds.Dx(); x++ {
+			alpha := templateImage.At(x, y).(color.NRGBA).A
+			if alpha > 100 {
+				if x < blurSize || x >= templateBounds.Dx()-blurSize || y < blurSize || y >= templateBounds.Dy()-blurSize {
+					// 在边界区域，对像素进行模糊处理
+					VagueImage(targetImage, x, y)
+				}
+			}
+		}
+	}
+
+	return targetImage
+}
+
+// VagueImage 对指定坐标的像素进行模糊处理
+func VagueImage(img *image.RGBA, x, y int) {
+	var red uint32
+	var green uint32
+	var blue uint32
+	var alpha uint32
+	var count uint32
+
+	points := [8][2]int{{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}}
+
+	for _, point := range points {
+		pointX := x + point[0]
+		pointY := y + point[1]
+
+		if pointX < 0 || pointX >= img.Bounds().Dx() || pointY < 0 || pointY >= img.Bounds().Dy() {
+			continue
+		}
+
+		r, g, b, a := img.RGBAAt(pointX, pointY).RGBA()
+		red += r >> 8
+		green += g >> 8
+		blue += b >> 8
+		alpha += a >> 8
+		count++
+	}
+
+	if count == 0 {
+		return
+	}
+
+	avg := count
+
+	rgba := color.RGBA{R: uint8(red / avg), G: uint8(green / avg), B: uint8(blue / avg), A: uint8(alpha / avg)}
+
+	img.SetRGBA(x, y, rgba)
+}
+
 // OverlayImage 图片覆盖（覆盖图压缩到width*height大小，覆盖到底图上）
 // baseImage：底图
 // coverImage：覆盖图
