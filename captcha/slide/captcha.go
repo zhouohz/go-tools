@@ -36,9 +36,9 @@ type Store interface {
 //}
 
 func GetCaptcha() (string, string, error) {
-	background := fmt.Sprintf("D:\\work\\go-tools\\captcha\\slide\\res\\bg\\%d.jpg", 5)
-	active := fmt.Sprintf("D:\\work\\go-tools\\captcha\\slide\\res\\block\\%d\\active.png", 1)
-	fixed := fmt.Sprintf("D:\\work\\go-tools\\captcha\\slide\\res\\block\\%d\\fixed.png", 1)
+	background := fmt.Sprintf("D:\\study\\go-tools\\captcha\\slide\\res\\bg\\%d.jpg", 5)
+	active := fmt.Sprintf("D:\\study\\go-tools\\captcha\\slide\\res\\block\\%d\\active.png", 1)
+	fixed := fmt.Sprintf("D:\\study\\go-tools\\captcha\\slide\\res\\block\\%d\\fixed.png", 1)
 	backImage, err := image2.ParseImage(background)
 	if err != nil {
 		log.Panic(err)
@@ -54,6 +54,7 @@ func GetCaptcha() (string, string, error) {
 
 	// 获取随机的 x 和 y 轴
 	randomX := random.RandomIntRange(fixedImage.Bounds().Dx()+5, backImage.Bounds().Dx()-fixedImage.Bounds().Dx()-10)
+	randomX = 50
 	randomY := random.RandInt(backImage.Bounds().Dy() - fixedImage.Bounds().Dy())
 	backOverlayImage := image2.OverlayImage(backImage, fixedImage, randomX, randomY)
 	cutImage := image2.CutImage(backImage, fixedImage, randomX, randomY)
