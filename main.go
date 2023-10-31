@@ -11,12 +11,40 @@ func main() {
 	r := gin.Default()
 	r.Use(Cors())
 	// 创建一个处理GET请求的路由
+	newSlide := slide.NewSlide(10)
 	r.GET("/get", func(c *gin.Context) {
 
-		captcha, s, _ := slide.GetCaptcha()
-		// 构建JSON响应
-		data := map[string]string{"bg": captcha, "block": s}
-		c.JSON(http.StatusOK, data)
+		//// 构建JSON响应
+		//data := map[string]string{"bg": captcha, "block": s}
+		generate, err := newSlide.Generate()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, nil)
+			return
+		}
+
+		c.JSON(http.StatusOK, map[string]any{
+			"bgImage":    generate.BgImage,
+			"blockImage": generate.BlockImage,
+			"key":        generate.Key,
+		})
+	})
+
+	r.POST("/check", func(c *gin.Context) {
+
+		////// 构建JSON响应
+		////data := map[string]string{"bg": captcha, "block": s}
+		//generate, err := newSlide.Generate()
+		//if err != nil {
+		//	c.JSON(http.StatusInternalServerError, nil)
+		//	return
+		//}
+		//
+		//c.JSON(http.StatusOK, map[string]any{
+		//	"bgImage":    generate.BgImage,
+		//	"blockImage": generate.BlockImage,
+		//	"key":        generate.Key,
+		//})
+		c.JSON(http.StatusOK, "ok1")
 	})
 
 	// 启动Gin服务器

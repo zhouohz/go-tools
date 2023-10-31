@@ -12,6 +12,12 @@ import (
 	"testing"
 )
 
+func TestImg(t *testing.T) {
+	//slide := NewSlide(10)
+
+	//slide.Get()
+}
+
 func TestName(t *testing.T) {
 
 	//bint := random.RandomIntRange(1, 3)

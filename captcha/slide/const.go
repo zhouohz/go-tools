@@ -1,6 +1,6 @@
 package slide
 
-const idLen = 20
 const (
-	cropSize = 72.0
+	Active = "active.png"
+	Fixed  = "fixed.png"
 )

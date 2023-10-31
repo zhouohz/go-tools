@@ -62,7 +62,6 @@ func GetCaptcha() (string, string, error) {
 	matrixTemplate := image2.CreateTransparentImage(actImage.Bounds().Dx(), backImage.Bounds().Dy())
 	//
 	i := image2.OverlayImage(matrixTemplate, overlayImage, 0, randomY)
-	fmt.Println("===================", randomX)
 	base64, err := image2.ToBase64(i)
 	if err != nil {
 		return "", "", err
