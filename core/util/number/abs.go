@@ -48,3 +48,11 @@ func AbsInt64(n int64) int64 {
 	shifted := n >> 63
 	return (n ^ shifted) - shifted
 }
+
+// AbsInt 返回int的绝对值
+func AbsInt(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}

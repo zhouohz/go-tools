@@ -7,10 +7,18 @@ import (
 
 var InnerBg = loadBgByNames([]string{
 	"captcha/resources/slider/bg/1.jpg",
+	"captcha/resources/slider/bg/2.jpg",
+	"captcha/resources/slider/bg/3.jpg",
+	"captcha/resources/slider/bg/4.jpg",
+	"captcha/resources/slider/bg/5.jpg",
+	"captcha/resources/slider/bg/6.jpg",
+	"captcha/resources/slider/bg/7.jpg",
 })
 
 var InnerBLock = dictBlock([]string{
 	"captcha/resources/slider/block/1",
+	"captcha/resources/slider/block/2",
+	"captcha/resources/slider/block/3",
 })
 
 type Block struct {

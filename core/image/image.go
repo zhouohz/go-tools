@@ -149,7 +149,6 @@ func VagueImage(img *image.RGBA, x, y int) {
 // x：起始x轴
 // y：起始y轴
 func OverlayImage(baseImage, coverImage image.Image, x, y int) *image.RGBA {
-
 	// 获取覆盖图的边界
 	coverBounds := coverImage.Bounds()
 

@@ -86,21 +86,48 @@ func (this *Slide) generatePoint(bg, fixed image.Image) *point {
 func (this *Slide) generateImage(bg image.Image, block Block) (*point, *image.RGBA, *image.RGBA) {
 
 	generatePoint := this.generatePoint(bg, block.Fixed)
-
 	backOverlayImage := image2.OverlayImage(bg, block.Fixed, generatePoint.x, generatePoint.y)
+	//interference := this.generateInterference(backOverlayImage, block, generatePoint)
+	//if interference != nil {
+	//	backOverlayImage = interference
+	//}
 	cutImage := image2.CutImage(bg, block.Fixed, generatePoint.x, generatePoint.y)
 	overlayImage := image2.OverlayImage(block.Active, cutImage, 0, 0)
-
 	matrixTemplate := image2.CreateTransparentImage(block.Active.Bounds().Dx(), bg.Bounds().Dy())
 	blockImage := image2.OverlayImage(matrixTemplate, overlayImage, 0, generatePoint.y)
 
 	return generatePoint, backOverlayImage, blockImage
 }
 
-//func Get() {
-//	//image := GetBackgroundImage()
-//	////image.Src
-//	//block := GetBlockImage()
-//	//fmt.Println(generatePoint(image, block))
-//
-//}
+func (this *Slide) generateInterference(bg image.Image, block Block, p *point) *image.RGBA {
+	// 获取背景图像的宽度和高度
+	bgWidth := bg.Bounds().Dx()
+	bgHeight := bg.Bounds().Dy()
+
+	// 获取缺口图像的宽度和高度
+	blockWidth := block.Fixed.Bounds().Dx()
+	blockHeight := block.Fixed.Bounds().Dy()
+
+	yRandomInternal := make([]random.Interval, 0)
+	// 如果fix上面有一个fix的区域，就要上面
+	if p.y+(2*blockHeight) < bgHeight {
+		yRandomInternal = append(yRandomInternal, random.Interval{
+			Start: p.y + blockHeight,
+			End:   bgHeight - blockHeight,
+		})
+	}
+	// 如果fix下面有一个fix的区域，就要上面
+	if p.y > blockHeight {
+		yRandomInternal = append(yRandomInternal, random.Interval{
+			Start: 0,
+			End:   p.y - blockHeight,
+		})
+	}
+	if len(yRandomInternal) != 0 {
+		randomX := random.RandomIntRange(blockWidth+5, bgWidth-blockWidth-10)
+		randomY := random.RandNumberInIntervals(yRandomInternal)
+		return image2.OverlayImage(bg, block.Fixed, randomX, randomY)
+	}
+	// 返回带有干扰位置的图像
+	return nil
+}
