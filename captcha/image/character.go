@@ -2,6 +2,8 @@ package image
 
 import (
 	"github.com/golang/freetype/truetype"
+	"github.com/zhouohz/go-tools/captcha/image/fonts"
+	"github.com/zhouohz/go-tools/core/util/random"
 	"image/color"
 	"strings"
 )

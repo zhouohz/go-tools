@@ -1,6 +1,7 @@
 package random
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -40,4 +41,39 @@ func RandIntSlice(l int, max int) []int {
 		slice[i] = RandInt(max)
 	}
 	return slice
+}
+
+// Interval 表示一个区间
+type Interval struct {
+	Start, End int
+}
+
+// RandNumberInIntervals 生成指定区间内的随机数
+func RandNumberInIntervals(intervals []Interval) int {
+	// 随机选择一个区间
+	interval := intervals[rand.Intn(len(intervals))]
+
+	// 生成该区间内的随机数
+	randomNumber := rand.Intn(interval.End-interval.Start+1) + interval.Start
+
+	return randomNumber
+}
+
+// RandNumberInMainInterval 生成随机数在主区间内，并剔除小区间
+func RandNumberInMainInterval(mainInterval Interval, excludedIntervals []Interval) int {
+	fmt.Println(mainInterval)
+	fmt.Println(excludedIntervals)
+	for {
+		randomNumber := rand.Intn(mainInterval.End-mainInterval.Start+1) + mainInterval.Start
+		valid := true
+		for _, excludedInterval := range excludedIntervals {
+			if randomNumber >= excludedInterval.Start && randomNumber <= excludedInterval.End {
+				valid = false
+				break
+			}
+		}
+		if valid {
+			return randomNumber
+		}
+	}
 }
