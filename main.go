@@ -1,7 +1,11 @@
 package main
 
 import (
-	"github.com/zhouohz/go-tools/captcha/slide"
+	"fmt"
+	"github.com/zhouohz/go-tools/captcha/core/click"
+	"github.com/zhouohz/go-tools/captcha/core/slide"
+	image2 "github.com/zhouohz/go-tools/core/image"
+	"github.com/zhouohz/go-tools/core/util/random"
 	"net/http"
 )
 import "github.com/gin-gonic/gin"
@@ -21,7 +25,6 @@ func main() {
 			c.JSON(http.StatusInternalServerError, nil)
 			return
 		}
-
 		c.JSON(http.StatusOK, map[string]any{
 			"bgImage":    generate.BgImage,
 			"blockImage": generate.BlockImage,
@@ -44,7 +47,31 @@ func main() {
 		//	"blockImage": generate.BlockImage,
 		//	"key":        generate.Key,
 		//})
-		c.JSON(http.StatusOK, "ok1")
+		randInt := random.RandInt(10)
+		if randInt > 5 {
+			c.JSON(http.StatusOK, "ok")
+		} else {
+			c.JSON(http.StatusOK, "ok1")
+		}
+
+	})
+
+	r.GET("/click/get", func(c *gin.Context) {
+
+		//// 构建JSON响应
+		//data := map[string]string{"bg": captcha, "block": s}
+		img, get := click.Get()
+		base64, err := image2.ToBase64(img)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, nil)
+			return
+		}
+		fmt.Println(get)
+		c.JSON(http.StatusOK, map[string]any{
+			"bgImage": base64,
+			"letters": get.Letter(),
+			//"key":        generate.Key,
+		})
 	})
 
 	// 启动Gin服务器

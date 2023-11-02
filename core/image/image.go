@@ -3,6 +3,7 @@ package image
 import (
 	"bytes"
 	"encoding/base64"
+	"github.com/fogleman/gg"
 	"golang.org/x/image/draw"
 	"image"
 	"image/color"
@@ -204,6 +205,17 @@ func ToBase64(img image.Image) (string, error) {
 	return encoded, nil
 }
 
+func SaveAs(img image.Image, filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	err = png.Encode(file, img)
+	return err
+}
+
 func ModifyImageRGBA(img image.Image, rgba color.RGBA) image.Image {
 	bounds := img.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
@@ -233,4 +245,16 @@ func ModifyImageRGBA(img image.Image, rgba color.RGBA) image.Image {
 	}
 
 	return newImg
+}
+
+func RotateImage(inputImage image.Image, angle float64) image.Image {
+	dc := gg.NewContextForImage(inputImage)
+
+	// 旋转图像
+	dc.Rotate(angle)
+
+	// 创建一个新图像
+	outputImage := dc.Image()
+
+	return outputImage
 }
