@@ -1,9 +1,11 @@
 package click
 
 import (
+	"fmt"
 	"github.com/fogleman/gg"
 	"github.com/zhouohz/go-tools/captcha/resources/click"
 	image2 "github.com/zhouohz/go-tools/core/image"
+	"github.com/zhouohz/go-tools/core/util/number"
 	"github.com/zhouohz/go-tools/core/util/random"
 	"image"
 	"image/color"
@@ -14,9 +16,9 @@ import (
 )
 
 const (
-	width    = 56
-	height   = 56
-	fontSize = 48
+	width    = 40
+	height   = 40
+	fontSize = 36
 	text     = "人"
 	fontPath = "captcha/resources/click/font/ZCOOLQingKeHuangYou-Regular.ttf" // 替换成你的字体文件路径
 )
@@ -43,34 +45,34 @@ func (ls Letters) Letter() []string {
 
 func Get() (image.Image, Letters) {
 	//随机背景
-	imgPath := "captcha/resources/click/bg/2.jpg"
+	imgPath := fmt.Sprintf("captcha/resources/click/bg/%d.jpg", random.RandomIntRange(1, 7))
 	image, err := image2.ParseImage(imgPath)
 	if err != nil {
 		panic(err)
 	}
 	num := 4
 	letters := getRandomLetters(num)
-	avg := image.Bounds().Dx() / num
+	interval := number.CalculateHypotenuse(width, height)
+	avg := image.Bounds().Dx() / interval
+	repair := (image.Bounds().Dx() - (interval * num)) / (num + 1)
+	if avg < num {
+		panic("超过数量")
+	}
 	ls := make([]Letter, num)
 	for i := range letters {
 		img := textImage(string(letters[i]), getRandomColor(), random.RandomFloatRange(0.0, 360.0))
 		// 随机x
-		randomX := 0
-		if i == 0 {
-			randomX = 10
-		} else {
-			randomX = avg * i
-		}
+		randomX := (interval * i) + (interval / 2) + (repair * (i + 1))
 		// 随机y
-		randomY := random.RandomIntRange(10, image.Bounds().Dy()-img.Bounds().Dy())
-		image = image2.OverlayImage(image, img, randomX, randomY)
+		randomY := random.RandomIntRange(height/2, image.Bounds().Dy()-(img.Bounds().Dy()/2))
+		image = image2.OverlayImageAtCenter(image, img, randomX, randomY)
 		ls[i] = Letter{
 			Point:  Point{X: randomX, Y: randomY},
 			Letter: string(letters[i]),
 		}
 	}
 
-	return image, RandomLetters(ls, 3)
+	return image, RandomLetters(ls, num-1)
 }
 
 func RandomLetters(objects []Letter, count int) []Letter {

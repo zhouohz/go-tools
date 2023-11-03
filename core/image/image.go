@@ -166,6 +166,28 @@ func OverlayImage(baseImage, coverImage image.Image, x, y int) *image.RGBA {
 	return rgba
 }
 
+// OverlayImageAtCenter 将覆盖图放置在底图上，以指定中心点坐标为准
+func OverlayImageAtCenter(baseImage, coverImage image.Image, centerX, centerY int) *image.RGBA {
+	// 获取覆盖图的边界
+	coverBounds := coverImage.Bounds()
+
+	// 创建一个新的 *image.RGBA，将底图复制到新图像上
+	rgba := image.NewRGBA(image.Rect(0, 0, baseImage.Bounds().Dx(), baseImage.Bounds().Dy()))
+	draw.Draw(rgba, baseImage.Bounds(), baseImage, image.Point{}, draw.Over)
+
+	// 计算覆盖图的位置和大小，以中心点为基准
+	x1 := centerX - coverBounds.Dx()/2
+	y1 := centerY - coverBounds.Dy()/2
+	x2 := x1 + coverBounds.Dx()
+	y2 := y1 + coverBounds.Dy()
+	coverRect := image.Rect(x1, y1, x2, y2)
+
+	// 将覆盖图绘制到新图像上
+	draw.Draw(rgba, coverRect, coverImage, image.Point{}, draw.Over)
+
+	return rgba
+}
+
 // CreateTransparentImage 创建一个透明图像
 // width：图像宽度
 // height：图像高度

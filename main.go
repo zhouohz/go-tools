@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/zhouohz/go-tools/captcha/core/click"
+	"github.com/zhouohz/go-tools/captcha/core/puzzle"
 	"github.com/zhouohz/go-tools/captcha/core/slide"
 	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/random"
@@ -74,6 +75,26 @@ func main() {
 		})
 	})
 
+	r.GET("/puzzle/get", func(c *gin.Context) {
+
+		//// 构建JSON响应
+		//data := map[string]string{"bg": captcha, "block": s}
+		imgs := puzzle.Get()
+		strings := make([]string, len(imgs))
+		for i := range imgs {
+			base64, err := image2.ToBase64(imgs[i])
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, nil)
+				return
+			}
+
+			strings[i] = base64
+		}
+		c.JSON(http.StatusOK, map[string]any{
+			"bgImage": strings,
+			//"key":        generate.Key,
+		})
+	})
 	// 启动Gin服务器
 	r.Run(":8080")
 }
