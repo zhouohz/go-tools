@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/fogleman/gg"
+	"github.com/zhouohz/go-tools/captcha/core/puzzle"
 	"github.com/zhouohz/go-tools/captcha/resources/click"
 	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/random"
@@ -167,4 +168,10 @@ func textImage(text string, co color.Color, d float64) image.Image {
 	dc.DrawStringAnchored(text, x, y, 0, 0)
 
 	return dc.Image()
+}
+
+func TestPuzzle(t *testing.T) {
+	get := puzzle.Get()
+
+	fmt.Println(get)
 }

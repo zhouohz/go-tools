@@ -3,6 +3,7 @@ package number
 import (
 	"fmt"
 	"github.com/zhouohz/go-tools/core/util/str"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -54,4 +55,15 @@ func NumInRange(in int, rangeStart, rangeEnd int, equal bool) bool {
 	}
 
 	return in > rangeStart && in < rangeEnd
+}
+
+// CalculateHypotenuse 计算直角三角形的斜边长度并向上取整
+func CalculateHypotenuse(a, b int) int {
+	// 使用整数运算计算斜边长度的平方
+	cSquared := a*a + b*b
+
+	// 向上取整
+	hypotenuse := int(math.Ceil(math.Sqrt(float64(cSquared))))
+
+	return hypotenuse
 }
