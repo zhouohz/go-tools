@@ -6,6 +6,8 @@ import (
 	"github.com/zhouohz/go-tools/core/util/random"
 	"golang.org/x/image/draw"
 	"image"
+	"math/rand"
+	"time"
 )
 
 func Get() []image.Image {
@@ -15,7 +17,7 @@ func Get() []image.Image {
 	if err != nil {
 		panic(err)
 	}
-	return SplitImage(bg, 2, 4)
+	return ShuffleAndRandomSwap(SplitImage(bg, 2, 4), 2)
 	//
 
 	//num := 4
@@ -41,6 +43,27 @@ func Get() []image.Image {
 	//}
 	//
 	//return image, RandomLetters(ls, num-1)
+}
+
+func ShuffleAndRandomSwap[T comparable](array []T, num int) []T {
+	if len(array) < num {
+		num = len(array)
+	}
+
+	source := rand.NewSource(time.Now().UnixNano()) // 使用当前时间作为随机种子
+	rng := rand.New(source)
+
+	// 随机选择两个不同的索引
+	index1 := rng.Intn(len(array))
+	index2 := rng.Intn(len(array))
+	for index2 == index1 {
+		index2 = rng.Intn(len(array))
+	}
+
+	// 交换这两个随机索引处的元素
+	array[index1], array[index2] = array[index2], array[index1]
+
+	return array
 }
 
 // SplitImage 分割一张图片为 8 个小块并保存
