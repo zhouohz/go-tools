@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/zhouohz/go-tools/captcha/core/click"
 	"github.com/zhouohz/go-tools/captcha/core/puzzle"
+	"github.com/zhouohz/go-tools/captcha/core/seq"
 	"github.com/zhouohz/go-tools/captcha/core/slide"
 	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/random"
@@ -73,6 +74,20 @@ func main() {
 			"letters": get.Letter(),
 			//"key":        generate.Key,
 		})
+	})
+
+	r.GET("/seq/get", func(c *gin.Context) {
+
+		//// 构建JSON响应
+		//data := map[string]string{"bg": captcha, "block": s}
+		se := seq.New()
+
+		if err := se.LoadWordDict("captcha/core/seq/dict.txt"); err != nil {
+			panic(err)
+		}
+
+		img, _ := se.Get()
+		c.JSON(http.StatusOK, img)
 	})
 
 	r.GET("/puzzle/get", func(c *gin.Context) {

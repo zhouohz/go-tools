@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fogleman/gg"
 	"github.com/zhouohz/go-tools/captcha/core/puzzle"
+	"github.com/zhouohz/go-tools/captcha/core/seq"
 	"github.com/zhouohz/go-tools/captcha/resources/click"
 	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/random"
@@ -174,4 +175,32 @@ func TestPuzzle(t *testing.T) {
 	get := puzzle.Get()
 
 	fmt.Println(get)
+}
+
+func TestName(t *testing.T) {
+	se := seq.New()
+
+	if err := se.LoadWordDict("captcha/core/seq/dict.txt"); err != nil {
+		panic(err)
+	}
+
+	_, letters := se.Get()
+
+	fmt.Println(letters)
+}
+
+func hasDuplicateChars(s string) bool {
+	charCount := make(map[rune]int)
+
+	for _, char := range s {
+		charCount[char]++
+
+		// 如果字符出现次数超过一次，返回 true
+		if charCount[char] > 1 {
+			return true
+		}
+	}
+
+	// 如果遍历完成没有找到相同字符，返回 false
+	return false
 }
