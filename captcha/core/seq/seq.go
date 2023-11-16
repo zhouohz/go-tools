@@ -2,9 +2,11 @@ package seq
 
 import (
 	"bufio"
-	"fmt"
+	"context"
+	"encoding/json"
 	"github.com/fogleman/gg"
 	"github.com/zhouohz/go-tools/captcha"
+	"github.com/zhouohz/go-tools/captcha/store"
 	"github.com/zhouohz/go-tools/core/collection/list"
 	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/id"
@@ -23,15 +25,19 @@ import (
 )
 
 const (
-	width    = 40
-	height   = 40
-	fontSize = 36
-	text     = "人"
-	fontPath = "captcha/resources/click/font/ZCOOLQingKeHuangYou-Regular.ttf" // 替换成你的字体文件路径
+	width       = 40
+	height      = 40
+	fontSize    = 36
+	fontPath    = "captcha/resources/click/font/ZCOOLQingKeHuangYou-Regular.ttf"
+	defaultDict = "captcha/resources/seq/dict.txt"
 )
+
+var temp = make(map[string][]Point)
 
 type Seq struct {
 	idioms [][]rune
+	offset int
+	store  store.Cache
 }
 
 type Letter struct {
@@ -54,59 +60,100 @@ func (ls Letters) Letter() []string {
 	return letters
 }
 
-// New
-func New() *Seq {
-	return &Seq{
-		idioms: make([][]rune, 0),
+func (ls Letters) Points() []Point {
+	points := make([]Point, len(ls))
+	for i, l := range ls {
+		points[i] = l.Point
 	}
+	return points
 }
 
-func (this *Seq) Get() (captcha.GetRes, error) {
-	//随机背景
-	imgPath := fmt.Sprintf("captcha/resources/seq/bg/%d.jpg", random.RandomIntRange(1, 7))
-	image, err := image2.ParseImage(imgPath)
-	if err != nil {
-		panic(err)
+// New
+func New(offset int, store store.Cache) *Seq {
+	seq := Seq{
+		idioms: make([][]rune, 0),
+		store:  store,
+		offset: offset,
 	}
-	num := 4
+	seq.LoadWordDict(defaultDict)
+
+	return &seq
+}
+
+func (this *Seq) Get(ctx context.Context) (*captcha.Generate, error) {
+	//随机背景
+	bgImg := captcha.RandGetBg()
 	letters := this.getRandomIdiom()
-	interval := number.CalculateHypotenuse(width, height)
-	avg := image.Bounds().Dx() / interval
-	repair := (image.Bounds().Dx() - (interval * num)) / (num + 1)
-	if avg < num {
-		panic("超过数量")
+
+	bgImg, ls := this.generate(bgImg, letters)
+	points := ls.Points()
+
+	uuid := id.IdUtil().FastSimpleUUID()
+
+	// 将 points 转换为 JSON 字符串
+	pointsJSON, err := json.Marshal(points)
+	if err != nil {
+		return nil, err
+	}
+	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
+	return &captcha.Generate{
+		Bg:    bgImg,
+		Front: 4,
+		Token: uuid,
+		//Answer: ls.Points(),
+	}, nil
+
+}
+
+func (this *Seq) Check(ctx context.Context, token, pointJson string) error {
+	var ps []Point
+	if err := json.Unmarshal([]byte(pointJson), &ps); err != nil {
+		return err
+	}
+	val := this.store.Get(ctx, captcha.GetID(token))
+	var points []Point
+	if err := json.Unmarshal([]byte(val), &points); err != nil {
+		return err
 	}
 
-	ls := make(Letters, num)
+	if len(ps) != len(points) {
+		return captcha.CheckCodeError
+	}
+
+	for i := range ps {
+		if !number.NumInRange(ps[i].X, points[i].X-this.offset, points[i].X+this.offset, true) ||
+			!number.NumInRange(ps[i].Y, points[i].Y-this.offset, points[i].Y+this.offset, true) {
+			return captcha.CheckCodeError
+		}
+
+	}
+
+	return nil
+
+}
+
+func (this *Seq) generate(bgImg image.Image, letters []rune) (image.Image, Letters) {
+	interval := number.CalculateHypotenuse(width, height)
+	repair := (bgImg.Bounds().Dx() - (interval * 4)) / 5
+	ls := make(Letters, 4)
 	shuffle := list.Shuffle([]int{0, 1, 2, 3})
 	for i := range letters {
 		img := this.textImage(string(letters[i]), this.getRandomColor(), random.RandomFloatRange(0.0, 360.0))
 		// 随机x
 		randomX := (interval * shuffle[i]) + (interval / 2) + (repair * (shuffle[i] + 1))
 		// 随机y
-		randomY := random.RandomIntRange(height/2, image.Bounds().Dy()-(img.Bounds().Dy()/2))
-		image = image2.OverlayImageAtCenter(image, img, randomX, randomY)
+		randomY := random.RandomIntRange(height/2, bgImg.Bounds().Dy()-(img.Bounds().Dy()/2))
+		bgImg = image2.OverlayImageAtCenter(bgImg, img, randomX, randomY)
 		ls[i] = Letter{
 			Point:  Point{X: randomX, Y: randomY},
 			Letter: string(letters[i]),
 		}
 	}
 
-	return captcha.GetRes{
-		Bg:    image,
-		Front: 4,
-		Token: id.IdUtil().FastSimpleUUID(),
-		Type:  4,
-	}, nil
-
-}
-
-func (this *Seq) Check(checkReq captcha.CheckReq) (captcha.CheckRsp, error) {
-
+	return bgImg, ls
 }
 
 func (this *Seq) randomLetters(objects []rune) []rune {
-	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(objects), func(i, j int) {
 		objects[i], objects[j] = objects[j], objects[i]
 	})

@@ -1,94 +1,110 @@
 package puzzle
 
 import (
-	"fmt"
-	image2 "github.com/zhouohz/go-tools/core/image"
-	"github.com/zhouohz/go-tools/core/util/random"
+	"context"
+	"encoding/json"
+	"github.com/zhouohz/go-tools/captcha"
+	"github.com/zhouohz/go-tools/captcha/store"
+	"github.com/zhouohz/go-tools/core/util/array"
+	"github.com/zhouohz/go-tools/core/util/id"
 	"golang.org/x/image/draw"
 	"image"
 	"math/rand"
-	"time"
 )
 
-func Get() []image.Image {
+type Puzzle struct {
+	store store.Cache
+}
+
+var temp = make(map[string][]int)
+
+// New
+func New(store store.Cache) *Puzzle {
+	return &Puzzle{store: store}
+}
+
+func (this *Puzzle) Get(ctx context.Context) (*captcha.Generate, error) {
 	//随机背景
-	imgPath := fmt.Sprintf("captcha/resources/click/bg/%d.jpg", random.RandomIntRange(1, 7))
-	bg, err := image2.ParseImage(imgPath)
-	if err != nil {
-		panic(err)
-	}
-	return ShuffleAndRandomSwap(SplitImage(bg, 2, 4), 2)
-	//
+	bg := captcha.RandGetBg()
 
-	//num := 4
-	//letters := getRandomLetters(num)
-	//interval := number.CalculateHypotenuse(width, height)
-	//avg := image.Bounds().Dx() / interval
-	//repair := (image.Bounds().Dx() - (interval * num)) / (num + 1)
-	//if avg < num {
-	//	panic("超过数量")
-	//}
-	//ls := make([]Letter, num)
-	//for i := range letters {
-	//	img := textImage(string(letters[i]), getRandomColor(), random.RandomFloatRange(0.0, 360.0))
-	//	// 随机x
-	//	randomX := (interval * i) + (interval / 2) + (repair * (i + 1))
-	//	// 随机y
-	//	randomY := random.RandomIntRange(height/2, image.Bounds().Dy()-(img.Bounds().Dy()/2))
-	//	image = image2.OverlayImageAtCenter(image, img, randomX, randomY)
-	//	ls[i] = Letter{
-	//		Point:  Point{X: randomX, Y: randomY},
-	//		Letter: string(letters[i]),
-	//	}
-	//}
-	//
-	//return image, RandomLetters(ls, num-1)
+	processImage, index := this.processImage(bg, 2, 4)
+	uuid := id.IdUtil().FastSimpleUUID()
+	temp[uuid] = index
+
+	return &captcha.Generate{
+		Bg:     processImage,
+		Front:  2,
+		Token:  uuid,
+		Answer: index,
+	}, nil
 }
 
-func ShuffleAndRandomSwap[T comparable](array []T, num int) []T {
-	if len(array) < num {
-		num = len(array)
+func (this *Puzzle) Check(ctx context.Context, token, pointJson string) error {
+
+	var ps []int
+	if err := json.Unmarshal([]byte(pointJson), &ps); err != nil {
+		return err
 	}
 
-	source := rand.NewSource(time.Now().UnixNano()) // 使用当前时间作为随机种子
-	rng := rand.New(source)
-
-	// 随机选择两个不同的索引
-	index1 := rng.Intn(len(array))
-	index2 := rng.Intn(len(array))
-	for index2 == index1 {
-		index2 = rng.Intn(len(array))
+	points, ok := temp[token]
+	if !ok {
+		return captcha.InvalidCodeError
 	}
 
-	// 交换这两个随机索引处的元素
-	array[index1], array[index2] = array[index2], array[index1]
+	if equal := array.EveryEqual(ps, points); !equal {
+		return captcha.CheckCodeError
+	}
 
-	return array
+	return nil
+
 }
 
-// SplitImage 分割一张图片为 8 个小块并保存
-func SplitImage(img image.Image, hNum, wNum int) []image.Image {
+func (this *Puzzle) processImage(input image.Image, hNum, wNum int) (image.Image, []int) {
 
 	// 获取图片的宽度和高度
-	width := img.Bounds().Dx()
-	height := img.Bounds().Dy()
-
-	// 计算每个小块的宽度和高度
-	blockWidth := width / wNum
-	blockHeight := height / hNum
-
-	images := make([]image.Image, 0)
-	for row := 0; row < hNum; row++ {
-		for col := 0; col < wNum; col++ {
-			x := col * blockWidth
-			y := row * blockHeight
-			blockRect := image.Rect(x, y, x+blockWidth, y+blockHeight)
-			block := image.NewRGBA(blockRect)
-			draw.Draw(block, block.Bounds(), img, blockRect.Min, draw.Src)
-
-			images = append(images, block)
+	bounds := input.Bounds()
+	width := bounds.Max.X
+	height := bounds.Max.Y
+	num := hNum * wNum
+	// 将图片分成八份
+	parts := make([]image.Image, num)
+	index := make([]int, num)
+	partWidth := width / wNum
+	partHeight := height / hNum
+	in := 0
+	for i := 0; i < hNum; i++ {
+		for j := 0; j < wNum; j++ {
+			x := j * partWidth
+			y := i * partHeight
+			index[in] = in
+			part := image.NewRGBA(image.Rect(0, 0, partWidth, partHeight))
+			draw.Draw(part, part.Bounds(), input, image.Point{x, y}, draw.Src)
+			parts[i*wNum+j] = part
+			in++
 		}
 	}
 
-	return images
+	// 随机调换两块
+	index1 := rand.Intn(num)
+	index2 := rand.Intn(num)
+	for index1 == index2 {
+		index2 = rand.Intn(num)
+	}
+
+	parts[index1], parts[index2] = parts[index2], parts[index1]
+	index[index1], index[index2] = index[index2], index[index1]
+
+	// 创建新的合并图像
+	mergedImg := image.NewRGBA(bounds)
+
+	// 合并图像
+	for i := 0; i < hNum; i++ {
+		for j := 0; j < wNum; j++ {
+			x := j * partWidth
+			y := i * partHeight
+			draw.Draw(mergedImg, image.Rect(x, y, x+partWidth, y+partHeight), parts[i*4+j], image.Point{0, 0}, draw.Src)
+		}
+	}
+
+	return mergedImg, index
 }

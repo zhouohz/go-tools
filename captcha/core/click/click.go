@@ -1,10 +1,15 @@
 package click
 
 import (
-	"fmt"
+	"context"
+	"encoding/json"
+	"errors"
 	"github.com/fogleman/gg"
+	"github.com/zhouohz/go-tools/captcha"
 	"github.com/zhouohz/go-tools/captcha/resources/click"
+	"github.com/zhouohz/go-tools/captcha/store"
 	image2 "github.com/zhouohz/go-tools/core/image"
+	"github.com/zhouohz/go-tools/core/util/id"
 	"github.com/zhouohz/go-tools/core/util/number"
 	"github.com/zhouohz/go-tools/core/util/random"
 	"image"
@@ -23,13 +28,21 @@ const (
 	fontPath = "captcha/resources/click/font/ZCOOLQingKeHuangYou-Regular.ttf" // 替换成你的字体文件路径
 )
 
+type ClickLetter struct {
+	num    int //文字数量
+	offset int //偏移量
+
+	store store.Cache
+}
+
 type Letter struct {
 	Point  Point
 	Letter string
 }
 
 type Point struct {
-	X, Y int
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 type Letters []Letter
@@ -39,55 +52,118 @@ func (ls Letters) Letter() []string {
 	for i, l := range ls {
 		letters[i] = l.Letter
 	}
-
 	return letters
 }
 
-func Get() (image.Image, Letters) {
-	//随机背景
-	imgPath := fmt.Sprintf("captcha/resources/click/bg/%d.jpg", random.RandomIntRange(1, 7))
-	image, err := image2.ParseImage(imgPath)
-	if err != nil {
-		panic(err)
+func (ls Letters) Points() []Point {
+	points := make([]Point, len(ls))
+	for i, l := range ls {
+		points[i] = l.Point
 	}
-	num := 4
-	letters := getRandomLetters(num)
+	return points
+}
+
+func New(num, offset int, cache store.Cache) *ClickLetter {
+	return &ClickLetter{
+		num:    num,
+		offset: offset,
+		store:  cache,
+	}
+}
+
+func (this *ClickLetter) Get(ctx context.Context) (*captcha.Generate, error) {
+	//随机背景
+	bgImg := captcha.RandGetBg()
+
+	letters := this.getRandomLetters(this.num)
+	bgImg, generate, err := this.generate(bgImg, letters)
+	if err != nil {
+		return nil, err
+	}
+
+	points := generate.Points()
+
+	uuid := id.IdUtil().FastSimpleUUID()
+
+	// 将 points 转换为 JSON 字符串
+	pointsJSON, err := json.Marshal(points)
+	if err != nil {
+		return nil, err
+	}
+
+	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
+
+	return &captcha.Generate{
+		Bg:     bgImg,
+		Front:  generate.Letter(),
+		Token:  uuid,
+		Answer: points,
+	}, nil
+}
+
+func (this *ClickLetter) Check(ctx context.Context, token, pointJson string) error {
+	var ps []Point
+	if err := json.Unmarshal([]byte(pointJson), &ps); err != nil {
+		return err
+	}
+	val := this.store.Get(ctx, captcha.GetID(token))
+	var points []Point
+	if err := json.Unmarshal([]byte(val), &points); err != nil {
+		return err
+	}
+
+	if len(ps) != len(points) {
+		return captcha.CheckCodeError
+	}
+
+	for i := range ps {
+		if !number.NumInRange(ps[i].X, points[i].X-this.offset, points[i].X+this.offset, true) ||
+			!number.NumInRange(ps[i].Y, points[i].Y-this.offset, points[i].Y+this.offset, true) {
+			return captcha.CheckCodeError
+		}
+
+	}
+
+	return nil
+}
+
+func (this *ClickLetter) generate(bgImg image.Image, letters []rune) (image.Image, Letters, error) {
 	interval := number.CalculateHypotenuse(width, height)
-	avg := image.Bounds().Dx() / interval
-	repair := (image.Bounds().Dx() - (interval * num)) / (num + 1)
+	avg := bgImg.Bounds().Dx() / interval
+	num := len(letters)
+	repair := (bgImg.Bounds().Dx() - (interval * num)) / (num + 1)
 	if avg < num {
-		panic("超过数量")
+		return nil, nil, errors.New("too many letters")
 	}
 	ls := make([]Letter, num)
 	for i := range letters {
-		img := textImage(string(letters[i]), getRandomColor(), random.RandomFloatRange(0.0, 360.0))
+		img := this.textImage(string(letters[i]), this.getRandomColor(), random.RandomFloatRange(0.0, 360.0))
 		// 随机x
 		randomX := (interval * i) + (interval / 2) + (repair * (i + 1))
 		// 随机y
-		randomY := random.RandomIntRange(height/2, image.Bounds().Dy()-(img.Bounds().Dy()/2))
-		image = image2.OverlayImageAtCenter(image, img, randomX, randomY)
+		randomY := random.RandomIntRange(height/2, bgImg.Bounds().Dy()-(img.Bounds().Dy()/2))
+		bgImg = image2.OverlayImageAtCenter(bgImg, img, randomX, randomY)
 		ls[i] = Letter{
 			Point:  Point{X: randomX, Y: randomY},
 			Letter: string(letters[i]),
 		}
 	}
 
-	return image, RandomLetters(ls, num-1)
+	return bgImg, this.randomLetters(ls, num-1), nil
 }
 
-func RandomLetters(objects []Letter, count int) []Letter {
-	rand.Seed(time.Now().UnixNano())
+func (this *ClickLetter) randomLetters(objects []Letter, count int) Letters {
 	rand.Shuffle(len(objects), func(i, j int) {
 		objects[i], objects[j] = objects[j], objects[i]
 	})
 	return objects[:count]
 }
 
-func toRadians(angdeg float64) float64 {
+func (this *ClickLetter) toRadians(angdeg float64) float64 {
 	return angdeg * (math.Pi / 180.0)
 }
 
-func textImage(text string, co color.Color, d float64) image.Image {
+func (this *ClickLetter) textImage(text string, co color.Color, d float64) image.Image {
 	// 创建一个透明的RGBA图像
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
@@ -108,13 +184,13 @@ func textImage(text string, co color.Color, d float64) image.Image {
 	x := (width - textWidth) / 2
 	y := (height + textHeight) / 2
 	// 在指定位置绘制汉字文本
-	dc.RotateAbout(toRadians(d), float64(img.Bounds().Dx())/2.0, float64(img.Bounds().Dy())/2.0)
+	dc.RotateAbout(this.toRadians(d), float64(img.Bounds().Dx())/2.0, float64(img.Bounds().Dy())/2.0)
 	dc.DrawStringAnchored(text, x, y, 0, 0)
 
 	return dc.Image()
 }
 
-func getRandomLetters(num int) []rune {
+func (this *ClickLetter) getRandomLetters(num int) []rune {
 	// 创建一个新的随机数生成器，以避免并发问题
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -138,7 +214,7 @@ func getRandomLetters(num int) []rune {
 }
 
 // 定义随机颜色
-func getRandomColor() color.Color {
+func (this *ClickLetter) getRandomColor() color.Color {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return color.RGBA{R: uint8(r.Intn(256)), G: uint8(r.Intn(256)), B: uint8(r.Intn(256)), A: 255}
 }

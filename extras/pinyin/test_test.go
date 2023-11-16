@@ -7,5 +7,5 @@ import (
 
 func TestName(t *testing.T) {
 
-	fmt.Println(GetPinyinEngine().Sentence("魃魈魁鬾魑魅魍魎").Unicode())
+	fmt.Println(GetPinyinEngine().Sentence("倚天屠龙记").Unicode())
 }

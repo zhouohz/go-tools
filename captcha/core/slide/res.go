@@ -1,29 +1,33 @@
 package slide
 
 import (
+	"github.com/zhouohz/go-tools/core/file"
 	image2 "github.com/zhouohz/go-tools/core/image"
+	"github.com/zhouohz/go-tools/core/util/random"
 	"image"
 )
 
-var InnerBg = loadBgByNames([]string{
-	"captcha/resources/slider/bg/1.jpg",
-	"captcha/resources/slider/bg/2.jpg",
-	"captcha/resources/slider/bg/3.jpg",
-	"captcha/resources/slider/bg/4.jpg",
-	"captcha/resources/slider/bg/5.jpg",
-	"captcha/resources/slider/bg/6.jpg",
-	"captcha/resources/slider/bg/7.jpg",
-})
+var innerBlock []Block
 
-var InnerBLock = dictBlock([]string{
-	"captcha/resources/slider/block/1",
-	"captcha/resources/slider/block/2",
-	"captcha/resources/slider/block/3",
-})
+func init() {
+
+	name, _ := file.ListFileName(blockDir, true, false)
+	innerBlock = dictBlock(name)
+}
+
+const (
+	Active   = "active.png"
+	Fixed    = "fixed.png"
+	blockDir = "captcha/resources/slider/block"
+)
 
 type Block struct {
 	Active image.Image
 	Fixed  image.Image
+}
+
+func RandGetBlock() Block {
+	return innerBlock[random.RandInt(len(innerBlock))]
 }
 
 func dictBlock(dir []string) []Block {

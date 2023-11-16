@@ -213,6 +213,20 @@ func IsSortedDESC[T tp.Ordered](array []T) bool {
 	return true
 }
 
+func EveryEqual[T comparable](arr1, arr2 []T) bool {
+	if len(arr1) != len(arr2) {
+		return false
+	}
+
+	for i, v := range arr1 {
+		if v != arr2[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 // copyOfRange 复制数组的一部分
 func copyOfRange[T any](original []T, from, to int) []T {
 	newLength := to - from
