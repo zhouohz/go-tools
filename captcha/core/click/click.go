@@ -24,8 +24,6 @@ const (
 	width    = 40
 	height   = 40
 	fontSize = 36
-	text     = "人"
-	fontPath = "captcha/resources/click/font/ZCOOLQingKeHuangYou-Regular.ttf" // 替换成你的字体文件路径
 )
 
 type ClickLetter struct {
@@ -74,6 +72,11 @@ func New(num, offset int, cache store.Cache) *ClickLetter {
 func (this *ClickLetter) Get(ctx context.Context) (*captcha.Generate, error) {
 	//随机背景
 	bgImg := captcha.RandGetBg()
+
+	bgImg, err := captcha.SetWatermark(bgImg, "寰宇天穹", 18, color.RGBA{R: 255, G: 255, B: 255, A: 195})
+	if err != nil {
+		return nil, err
+	}
 
 	letters := this.getRandomLetters(this.num)
 	bgImg, generate, err := this.generate(bgImg, letters)
@@ -136,12 +139,13 @@ func (this *ClickLetter) generate(bgImg image.Image, letters []rune) (image.Imag
 		return nil, nil, errors.New("too many letters")
 	}
 	ls := make([]Letter, num)
+	font := captcha.RandGetFont()
 	for i := range letters {
-		img := this.textImage(string(letters[i]), this.getRandomColor(), random.RandomFloatRange(0.0, 360.0))
+		img := this.textImage(string(letters[i]), font, captcha.RandomColor(), random.RandomFloatRange(0.0, 360.0))
 		// 随机x
 		randomX := (interval * i) + (interval / 2) + (repair * (i + 1))
 		// 随机y
-		randomY := random.RandomIntRange(height/2, bgImg.Bounds().Dy()-(img.Bounds().Dy()/2))
+		randomY := random.RandomIntRange(height/2, bgImg.Bounds().Dy()-(img.Bounds().Dy()/2)-30)
 		bgImg = image2.OverlayImageAtCenter(bgImg, img, randomX, randomY)
 		ls[i] = Letter{
 			Point:  Point{X: randomX, Y: randomY},
@@ -163,7 +167,7 @@ func (this *ClickLetter) toRadians(angdeg float64) float64 {
 	return angdeg * (math.Pi / 180.0)
 }
 
-func (this *ClickLetter) textImage(text string, co color.Color, d float64) image.Image {
+func (this *ClickLetter) textImage(text string, f string, co color.Color, d float64) image.Image {
 	// 创建一个透明的RGBA图像
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
@@ -174,7 +178,7 @@ func (this *ClickLetter) textImage(text string, co color.Color, d float64) image
 	dc.SetColor(co)
 
 	// 加载汉字字体
-	err := dc.LoadFontFace(fontPath, fontSize) // 替换成你的汉字字体文件路径
+	err := dc.LoadFontFace(f, fontSize) // 替换成你的汉字字体文件路径
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -211,10 +215,4 @@ func (this *ClickLetter) getRandomLetters(num int) []rune {
 	}
 
 	return selected
-}
-
-// 定义随机颜色
-func (this *ClickLetter) getRandomColor() color.Color {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return color.RGBA{R: uint8(r.Intn(256)), G: uint8(r.Intn(256)), B: uint8(r.Intn(256)), A: 255}
 }

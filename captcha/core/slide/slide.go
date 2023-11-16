@@ -3,7 +3,6 @@ package slide
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/zhouohz/go-tools/captcha"
 	"github.com/zhouohz/go-tools/captcha/store"
 	image2 "github.com/zhouohz/go-tools/core/image"
@@ -11,6 +10,7 @@ import (
 	"github.com/zhouohz/go-tools/core/util/number"
 	"github.com/zhouohz/go-tools/core/util/random"
 	"image"
+	"image/color"
 )
 
 // Slide captcha config for captcha-engine-slide.
@@ -49,6 +49,11 @@ func (this *Slide) Get(ctx context.Context) (*captcha.Generate, error) {
 	block := RandGetBlock()
 	bg := captcha.RandGetBg()
 
+	bg, err := captcha.SetWatermark(bg, "寰宇天穹", 18, color.RGBA{R: 255, G: 255, B: 255, A: 195})
+	if err != nil {
+		return nil, err
+	}
+
 	//获取
 	point, bgImage, blockImage := this.generateImage(bg, block)
 
@@ -72,7 +77,6 @@ func (this *Slide) Get(ctx context.Context) (*captcha.Generate, error) {
 }
 
 func (this *Slide) Check(ctx context.Context, token, pointJson string) error {
-	fmt.Println(pointJson)
 	var ps point
 	if err := json.Unmarshal([]byte(pointJson), &ps); err != nil {
 		return err
@@ -93,7 +97,7 @@ func (this *Slide) Check(ctx context.Context, token, pointJson string) error {
 // generatePoint 生成坐标点
 func (this *Slide) generatePoint(bg, fixed image.Image) *point {
 	randomX := random.RandomIntRange(fixed.Bounds().Dx()+5, bg.Bounds().Dx()-fixed.Bounds().Dx()-10)
-	randomY := random.RandInt(bg.Bounds().Dy() - fixed.Bounds().Dy())
+	randomY := random.RandInt(bg.Bounds().Dy() - fixed.Bounds().Dy() - 30)
 	return &point{X: randomX, Y: randomY}
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/zhouohz/go-tools/core/util/id"
 	"golang.org/x/image/draw"
 	"image"
+	"image/color"
 	"math/rand"
 )
 
@@ -26,6 +27,11 @@ func New(store store.Cache) *Puzzle {
 func (this *Puzzle) Get(ctx context.Context) (*captcha.Generate, error) {
 	//随机背景
 	bg := captcha.RandGetBg()
+
+	bg, err := captcha.SetWatermark(bg, "寰宇天穹", 18, color.RGBA{R: 255, G: 255, B: 255, A: 195})
+	if err != nil {
+		return nil, err
+	}
 
 	processImage, index := this.processImage(bg, 2, 4)
 	uuid := id.IdUtil().FastSimpleUUID()
