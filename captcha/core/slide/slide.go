@@ -61,6 +61,15 @@ func (this *Slide) Get(ctx context.Context) (*captcha.Generate, error) {
 
 	uuid := id.IdUtil().FastSimpleUUID()
 
+	base641, err := image2.ToBase64(bgImage, true)
+	if err != nil {
+		return nil, err
+	}
+	base642, err := image2.ToBase64(blockImage, true)
+	if err != nil {
+		return nil, err
+	}
+
 	// 将 points 转换为 JSON 字符串
 	pointsJSON, err := json.Marshal(point)
 	if err != nil {
@@ -68,8 +77,8 @@ func (this *Slide) Get(ctx context.Context) (*captcha.Generate, error) {
 	}
 	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
 	return &captcha.Generate{
-		Bg:    bgImage,
-		Front: blockImage,
+		Bg:    base641,
+		Front: base642,
 		Token: uuid,
 		//Answer: point,
 	}, nil

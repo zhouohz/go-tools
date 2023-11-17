@@ -95,17 +95,21 @@ func (this *Seq) Get(ctx context.Context) (*captcha.Generate, error) {
 
 	uuid := id.IdUtil().FastSimpleUUID()
 
+	base64, err := image2.ToBase64(bgImg, true)
+	if err != nil {
+		return nil, err
+	}
 	// 将 points 转换为 JSON 字符串
 	pointsJSON, err := json.Marshal(points)
 	if err != nil {
 		return nil, err
 	}
 	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
+
 	return &captcha.Generate{
-		Bg:    bgImg,
+		Bg:    base64,
 		Front: 4,
 		Token: uuid,
-		//Answer: ls.Points(),
 	}, nil
 
 }
@@ -126,8 +130,8 @@ func (this *Seq) Check(ctx context.Context, token, pointJson string) error {
 	}
 
 	for i := range ps {
-		if !number.NumInRange(ps[i].X, points[i].X-this.offset, points[i].X+this.offset, true) ||
-			!number.NumInRange(ps[i].Y, points[i].Y-this.offset, points[i].Y+this.offset, true) {
+		if !number.NumInRange(ps[i].X, points[i].X-(fontSize/2), points[i].X+(fontSize/2), true) ||
+			!number.NumInRange(ps[i].Y, points[i].Y-(fontSize/2), points[i].Y+(fontSize/2), true) {
 			return captcha.CheckCodeError
 		}
 

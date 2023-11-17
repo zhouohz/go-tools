@@ -15,6 +15,10 @@ import (
 	"strings"
 )
 
+const (
+	Base64 = "data:image/png;base64,"
+)
+
 // ParseImage 解析图片并返回解析后的图像对象
 // imagePath：图片文件路径
 func ParseImage(imagePath string) (image.Image, error) {
@@ -212,7 +216,7 @@ func ConvertToRGBA(input image.Image) *image.RGBA {
 }
 
 // ToBase64 将 image.Image 转换为 Base64 字符串
-func ToBase64(img image.Image) (string, error) {
+func ToBase64(img image.Image, havePrefix bool) (string, error) {
 	// 创建一个字节数组缓冲区
 	var buf bytes.Buffer
 
@@ -223,6 +227,10 @@ func ToBase64(img image.Image) (string, error) {
 
 	// 将字节数组转换为Base64字符串
 	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	if havePrefix {
+		encoded = Base64 + encoded
+	}
 
 	return encoded, nil
 }

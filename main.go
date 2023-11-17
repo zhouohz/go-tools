@@ -7,8 +7,6 @@ import (
 	"github.com/zhouohz/go-tools/captcha/core/seq"
 	"github.com/zhouohz/go-tools/captcha/core/slide"
 	"github.com/zhouohz/go-tools/captcha/store"
-	image2 "github.com/zhouohz/go-tools/core/image"
-	"image"
 	"net/http"
 )
 import "github.com/gin-gonic/gin"
@@ -31,7 +29,7 @@ func main() {
 	factory := captcha.NewCaptchaServiceFactory()
 
 	cache := store.NewMemoryCache()
-	factory.RegisterService(captcha.Click, click.New(4, 5, cache))
+	factory.RegisterService(captcha.Click, click.New(4, 18, cache))
 	factory.RegisterService(captcha.Puzzle, puzzle.New(cache))
 	factory.RegisterService(captcha.Seq, seq.New(5, cache))
 	factory.RegisterService(captcha.Slide, slide.New(5, cache))
@@ -49,24 +47,8 @@ func main() {
 			return
 		}
 
-		base64, err := image2.ToBase64(generate.Bg.(image.Image))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		if g.Type == captcha.Slide {
-			base64, err := image2.ToBase64(generate.Front.(image.Image))
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, err.Error())
-				return
-			}
-
-			generate.Front = base64
-		}
-
 		c.JSON(http.StatusOK, map[string]any{
-			"bgImage": base64,
+			"bgImage": generate.Bg,
 			"token":   generate.Token,
 			"front":   generate.Front,
 		})

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/fogleman/gg"
 	"github.com/zhouohz/go-tools/captcha"
 	"github.com/zhouohz/go-tools/captcha/resources/click"
@@ -88,16 +89,19 @@ func (this *ClickLetter) Get(ctx context.Context) (*captcha.Generate, error) {
 
 	uuid := id.IdUtil().FastSimpleUUID()
 
+	base64, err := image2.ToBase64(bgImg, true)
+	if err != nil {
+		return nil, err
+	}
 	// 将 points 转换为 JSON 字符串
 	pointsJSON, err := json.Marshal(points)
 	if err != nil {
 		return nil, err
 	}
-
 	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
 
 	return &captcha.Generate{
-		Bg:     bgImg,
+		Bg:     base64,
 		Front:  generate.Letter(),
 		Token:  uuid,
 		Answer: points,
@@ -109,19 +113,20 @@ func (this *ClickLetter) Check(ctx context.Context, token, pointJson string) err
 	if err := json.Unmarshal([]byte(pointJson), &ps); err != nil {
 		return err
 	}
+
 	val := this.store.Get(ctx, captcha.GetID(token))
 	var points []Point
 	if err := json.Unmarshal([]byte(val), &points); err != nil {
+		fmt.Println(err)
 		return err
 	}
-
 	if len(ps) != len(points) {
 		return captcha.CheckCodeError
 	}
 
 	for i := range ps {
-		if !number.NumInRange(ps[i].X, points[i].X-this.offset, points[i].X+this.offset, true) ||
-			!number.NumInRange(ps[i].Y, points[i].Y-this.offset, points[i].Y+this.offset, true) {
+		if !number.NumInRange(ps[i].X, points[i].X-(fontSize/2), points[i].X+(fontSize/2), true) ||
+			!number.NumInRange(ps[i].Y, points[i].Y-(fontSize/2), points[i].Y+(fontSize/2), true) {
 			return captcha.CheckCodeError
 		}
 

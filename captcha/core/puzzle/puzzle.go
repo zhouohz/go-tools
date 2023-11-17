@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/zhouohz/go-tools/captcha"
 	"github.com/zhouohz/go-tools/captcha/store"
-	"github.com/zhouohz/go-tools/core/util/array"
+	image2 "github.com/zhouohz/go-tools/core/image"
 	"github.com/zhouohz/go-tools/core/util/id"
 	"golang.org/x/image/draw"
 	"image"
@@ -16,8 +16,6 @@ import (
 type Puzzle struct {
 	store store.Cache
 }
-
-var temp = make(map[string][]int)
 
 // New
 func New(store store.Cache) *Puzzle {
@@ -35,10 +33,21 @@ func (this *Puzzle) Get(ctx context.Context) (*captcha.Generate, error) {
 
 	processImage, index := this.processImage(bg, 2, 4)
 	uuid := id.IdUtil().FastSimpleUUID()
-	temp[uuid] = index
+
+	base64, err := image2.ToBase64(processImage, true)
+	if err != nil {
+		return nil, err
+	}
+
+	// 将 points 转换为 JSON 字符串
+	pointsJSON, err := json.Marshal(index)
+	if err != nil {
+		return nil, err
+	}
+	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
 
 	return &captcha.Generate{
-		Bg:     processImage,
+		Bg:     base64,
 		Front:  2,
 		Token:  uuid,
 		Answer: index,
@@ -52,14 +61,14 @@ func (this *Puzzle) Check(ctx context.Context, token, pointJson string) error {
 		return err
 	}
 
-	points, ok := temp[token]
-	if !ok {
-		return captcha.InvalidCodeError
-	}
+	//points, ok := temp[token]
+	//if !ok {
+	//	return captcha.InvalidCodeError
+	//}
 
-	if equal := array.EveryEqual(ps, points); !equal {
-		return captcha.CheckCodeError
-	}
+	//if equal := array.EveryEqual(ps, points); !equal {
+	//	return captcha.CheckCodeError
+	//}
 
 	return nil
 
