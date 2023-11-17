@@ -6,6 +6,7 @@ import (
 	"github.com/zhouohz/go-tools/captcha"
 	"github.com/zhouohz/go-tools/captcha/store"
 	image2 "github.com/zhouohz/go-tools/core/image"
+	"github.com/zhouohz/go-tools/core/util/array"
 	"github.com/zhouohz/go-tools/core/util/id"
 	"golang.org/x/image/draw"
 	"image"
@@ -23,7 +24,7 @@ func New(store store.Cache) *Puzzle {
 }
 
 func (this *Puzzle) Get(ctx context.Context) (*captcha.Generate, error) {
-	//随机背景
+	// 随机背景
 	bg := captcha.RandGetBg()
 
 	bg, err := captcha.SetWatermark(bg, "寰宇天穹", 18, color.RGBA{R: 255, G: 255, B: 255, A: 195})
@@ -44,6 +45,7 @@ func (this *Puzzle) Get(ctx context.Context) (*captcha.Generate, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	this.store.Set(ctx, captcha.GetID(uuid), string(pointsJSON), 300)
 
 	return &captcha.Generate{
@@ -61,14 +63,17 @@ func (this *Puzzle) Check(ctx context.Context, token, pointJson string) error {
 		return err
 	}
 
-	//points, ok := temp[token]
-	//if !ok {
-	//	return captcha.InvalidCodeError
-	//}
+	var points []int
 
-	//if equal := array.EveryEqual(ps, points); !equal {
-	//	return captcha.CheckCodeError
-	//}
+	val := this.store.Get(ctx, captcha.GetID(token))
+
+	if err := json.Unmarshal([]byte(val), &points); err != nil {
+		return err
+	}
+
+	if equal := array.EveryEqual(ps, points); !equal {
+		return captcha.CheckCodeError
+	}
 
 	return nil
 
